@@ -623,7 +623,10 @@ callCabalPathForCompilerPath l vs workDir projectFile = do
         parse_compiler_path = Aeson.parseEither ((.: "compiler") >=>  (.: "path")) <=< Aeson.eitherDecode
 
       compiler_info <- Process.readProcessWithCwd_ l workDir "cabal" args ""
-      case parse_compiler_path (bs compiler_info) of
+      -- Strip any non-JSON noise lines (e.g. darcs warnings) before parsing.
+      -- The JSON output always starts with '{'.
+      let strip_noise = dropWhile (\c -> c /= '{') compiler_info
+      case parse_compiler_path (bs strip_noise) of
         Left err -> do
           liftIO $ l <& WithSeverity (LogCabalPath $ T.pack err) Warning
           pure Nothing
