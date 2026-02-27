@@ -403,7 +403,7 @@ cabalProcess l vs cabalProject workDir command args = do
   ghcDirs@(ghcBin, libdir) <- callCabalPathForCompilerPath l vs workDir cabalProject >>= \case
     Just p -> do
       libdir <- Process.readProcessWithCwd_ l workDir p ["--print-libdir"] ""
-      pure (p, trimEnd libdir)
+      pure (p, trim libdir)
     Nothing -> cabalGhcDirs l cabalProject workDir
 
   ghcPkgPath <- liftIO $ withGhcPkgTool ghcBin libdir
@@ -464,7 +464,7 @@ cabalGhcDirs l cabalProject workDir = do
        ]
       )
       ""
-  pure (trimEnd exe, trimEnd libdir)
+  pure (trim exe, trim libdir)
   where
     projectFileArgs = projectFileProcessArgs cabalProject
 
